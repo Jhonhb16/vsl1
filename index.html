@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Quick Wellness Check</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f4f5fb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #1f2933;
+    }
+
+    .quiz-wrapper {
+      background: #ffffff;
+      width: 100%;
+      max-width: 460px;
+      padding: 24px 22px 26px;
+      border-radius: 18px;
+      box-shadow: 0 8px 25px rgba(15, 23, 42, 0.09);
+    }
+
+    .logo {
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+      color: #4b5563;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-bottom: 18px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: #4f46e5;
+      transition: width 0.3s ease;
+    }
+
+    .step-indicator {
+      font-size: 0.8rem;
+      color: #6b7280;
+      text-align: right;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 1.15rem;
+      margin: 0 0 6px;
+      text-align: center;
+      color: #111827;
+    }
+
+    .step-description {
+      font-size: 0.9rem;
+      color: #6b7280;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 11px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      background: #f9fafb;
+    }
+
+    select:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.3);
+      background: #ffffff;
+    }
+
+    .options-group {
+      display: grid;
+      gap: 8px;
+    }
+
+    .option-btn {
+      border-radius: 12px;
+      border: 1px solid #d1d5db;
+      padding: 9px 11px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f9fafb;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .option-btn span {
+      pointer-events: none;
+    }
+
+    .option-btn input {
+      display: none;
+    }
+
+    .option-btn.selected {
+      border-color: #4f46e5;
+      background: #eef2ff;
+      box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.25);
+    }
+
+    .option-indicator {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid #d1d5db;
+      flex-shrink: 0;
+      margin-left: 10px;
+      pointer-events: none;
+    }
+
+    .option-btn.selected .option-indicator {
+      border-color: #4f46e5;
+      background: radial-gradient(circle at center, #4f46e5 45%, transparent 47%);
+    }
+
+    .buttons-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      flex: 1;
+      border-radius: 999px;
+      border: none;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: #4f46e5;
+      color: #ffffff;
+      box-shadow: 0 8px 18px rgba(79, 70, 229, 0.35);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(79, 70, 229, 0.45);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+      transform: translateY(-1px);
+    }
+
+    .note {
+      margin-top: 14px;
+      font-size: 0.78rem;
+      color: #9ca3af;
+      line-height: 1.4;
+    }
+
+    .error-msg {
+      font-size: 0.8rem;
+      color: #b91c1c;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .success-msg {
+      font-size: 0.9rem;
+      color: #065f46;
+      background: #ecfdf5;
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    @media (max-width: 480px) {
+      .quiz-wrapper {
+        margin: 16px;
+        padding: 20px 16px;
+      }
+      h1 {
+        font-size: 1.05rem;
+      }
+      .subtitle {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-wrapper">
+    <div class="logo">
+      WELLNESS CHECK
+    </div>
+    <div class="subtitle">
+      This short quiz helps us tailor what you’ll see next. It takes less than 30 seconds.
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="step-indicator" id="stepIndicator">
+      Step 1 of 3
+    </div>
+
+    <!-- Step 1: Country -->
+    <div class="step" id="step-1">
+      <h1>First, where do you live?</h1>
+      <p class="step-description">
+        We use this only to show region-appropriate information.
+      </p>
+
+      <div class="form-group">
+        <label for="country">Select your country</label>
+        <select id="country">
+          <option value="">Choose an option</option>
+          <option value="United States">United States</option>
+          <option value="Canada">Canada</option>
+          <option value="United Kingdom">United Kingdom</option>
+          <option value="Australia">Australia</option>
+          <option value="Mexico">Mexico</option>
+          <option value="Other">Other</option>
+        </select>
+        <p class="error-msg" id="error-step-1">
+          Please select your country to continue.
+        </p>
+      </div>
+
+      <div class="buttons-row">
+        <button class="btn btn-secondary" type="button" disabled>
+          Back
+        </button>
+        <button class="btn btn-primary" type="button" id="next-1">
+          Next
+        </button>
+      </div>
+
+      <p class="note">
+        Your answers are anonymous and are not shared or sold. They’re only used to personalize the next step.
+      </p>
+    </div>
+
+    <!-- Step 2: Gender -->
+    <div class="step" id="step-2" style="display: none;">
+      <h1>How do you identify?</h1>
+      <p class="step-description">
+        Some recommendations can change slightly based on this.
+      </p>
+
+      <div class="form-group">
+        <label>Choose one</label>
+        <div class="options-group" id="genderOptions">
+          <label class="option-btn">
+            <span>Female</span>
+            <span class="option-indicator"></span>
+            <input type="radio" name="gender" value="Female" />
+          </label>
+          <label class="option-btn">
+            <span>Male</span>
+            <span class="option-indicator"></span>
+            <input type="radio" name="gender" value="Male" />
+          </label>
+          <label class="option-btn">
+            <span>Prefer not to say</span>
+            <span class="option-indicator"></span>
+            <input type="radio" name="gender" value="Prefer not to say" />
+          </label>
+        </div>
+        <p class="error-msg" id="error-step-2">
+          Please select one option to continue.
+        </p>
+      </div>
+
+      <div class="buttons-row">
+        <button class="btn btn-secondary" type="button" id="back-2">
+          Back
+        </button>
+        <button class="btn btn-primary" type="button" id="next-2">
+          Next
+        </button>
+      </div>
+
+      <p class="note">
+        This question is optional. You can skip by choosing “Prefer not to say”.
+      </p>
+    </div>
+
+    <!-- Step 3: Wellness goal -->
+    <div class="step" id="step-3" style="display: none;">
+      <h1>What are you most focused on right now?</h1>
+      <p class="step-description">
+        Pick the one that feels closest to your current priority.
+      </p>
+
+      <div class="form-group">
+        <label>Main focus</label>
+        <div class="options-group" id="goalOptions">
+          <label class="option-btn">
+            <span>Supporting better daily habits</span>
+            <span class="option-indicator"></span>
+            <input type="radio" name="goal" value="Habits" />
+          </label>
+          <label class="option-btn">
+            <span>Feeling more balanced and energized</span>
+            <span class="option-indicator"></span>
+            <input type="radio" name="goal" value="Energy" />
+          </label>
+          <label class="option-btn">
+            <span>Taking better care of long-term health</span>
+            <span class="option-indicator"></span>
+            <input type="radio" name="goal" value="Long-term health" />
+          </label>
+        </div>
+        <p class="error-msg" id="error-step-3">
+          Please select your main focus to continue.
+        </p>
+      </div>
+
+      <div class="buttons-row">
+        <button class="btn btn-secondary" type="button" id="back-3">
+          Back
+        </button>
+        <button class="btn btn-primary" type="button" id="finish">
+          Continue
+        </button>
+      </div>
+
+      <p class="note">
+        This is general wellness information and is not a diagnosis or treatment. Always talk to your healthcare provider about any specific questions.
+      </p>
+
+      <div class="success-msg" id="successMsg">
+        Thanks! Based on your answers, we’re preparing your next step…
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Settings
+    const TOTAL_STEPS = 3;
+    const FINAL_URL = "https://getkeyslimdrops.cc/vsl1/#aff=jhonhb16";
+
+    const steps = {
+      1: document.getElementById("step-1"),
+      2: document.getElementById("step-2"),
+      3: document.getElementById("step-3"),
+    };
+
+    const progressFill = document.getElementById("progressFill");
+    const stepIndicator = document.getElementById("stepIndicator");
+    const successMsg = document.getElementById("successMsg");
+
+    let currentStep = 1;
+
+    function updateProgress() {
+      const progressPercent = (currentStep / TOTAL_STEPS) * 100;
+      progressFill.style.width = progressPercent + "%";
+      stepIndicator.textContent = "Step " + currentStep + " of " + TOTAL_STEPS;
+    }
+
+    function showStep(step) {
+      Object.keys(steps).forEach((key) => {
+        steps[key].style.display = Number(key) === step ? "block" : "none";
+      });
+      currentStep = step;
+      updateProgress();
+    }
+
+    function validateStep(step) {
+      if (step === 1) {
+        const country = document.getElementById("country").value.trim();
+        const error = document.getElementById("error-step-1");
+        if (!country) {
+          error.style.display = "block";
+          return false;
+        }
+        error.style.display = "none";
+        return true;
+      }
+
+      if (step === 2) {
+        const genderInputs = document.querySelectorAll(
+          'input[name="gender"]'
+        );
+        let selected = false;
+        genderInputs.forEach((input) => {
+          if (input.checked) selected = true;
+        });
+        const error = document.getElementById("error-step-2");
+        if (!selected) {
+          error.style.display = "block";
+          return false;
+        }
+        error.style.display = "none";
+        return true;
+      }
+
+      if (step === 3) {
+        const goalInputs = document.querySelectorAll('input[name="goal"]');
+        let selected = false;
+        goalInputs.forEach((input) => {
+          if (input.checked) selected = true;
+        });
+        const error = document.getElementById("error-step-3");
+        if (!selected) {
+          error.style.display = "block";
+          return false;
+        }
+        error.style.display = "none";
+        return true;
+      }
+
+      return true;
+    }
+
+    // Visual selection
+    function setupOptionGroup(containerId) {
+      const container = document.getElementById(containerId);
+      const optionButtons = container.querySelectorAll(".option-btn");
+
+      optionButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          optionButtons.forEach((b) => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          const input = btn.querySelector("input[type='radio']");
+          if (input) {
+            input.checked = true;
+          }
+        });
+      });
+    }
+
+    setupOptionGroup("genderOptions");
+    setupOptionGroup("goalOptions");
+
+    // Buttons
+    document.getElementById("next-1").addEventListener("click", () => {
+      if (validateStep(1)) {
+        showStep(2);
+      }
+    });
+
+    document.getElementById("back-2").addEventListener("click", () => {
+      showStep(1);
+    });
+
+    document.getElementById("next-2").addEventListener("click", () => {
+      if (validateStep(2)) {
+        showStep(3);
+      }
+    });
+
+    document.getElementById("back-3").addEventListener("click", () => {
+      showStep(2);
+    });
+
+    document.getElementById("finish").addEventListener("click", () => {
+      if (!validateStep(3)) return;
+
+      successMsg.style.display = "block";
+
+      setTimeout(() => {
+        window.location.href = FINAL_URL;
+      }, 900);
+    });
+
+    // Init
+    updateProgress();
+  </script>
+</body>
+</html>
